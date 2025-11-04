@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signup | ExoMart</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script
+      src="https://kit.fontawesome.com/a2e0e6ad2c.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body class="auth-body">
+    <div class="auth-card">
+      <h2>Create Your <span class="brand">ExoMart</span> Account</h2>
+      <form id="signupForm" class="auth-form">
+        <input type="text" id="name" placeholder="Full Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit" class="btn-primary">Sign Up</button>
+      </form>
+      <p class="auth-switch">
+        Already have an account? <a href="login.html">Login</a>
+      </p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"><i></i> <span id="toast-message"></span></div>
+
+    <script>
+      document.getElementById("signupForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+
+        if (users.some((u) => u.email === email)) {
+          showToast("Account already exists!", "error");
+          return;
+        }
+
+        users.push({ name, email, password });
+        localStorage.setItem("users", JSON.stringify(users));
+
+        showToast("Signup successful! Please log in.", "success");
+        setTimeout(() => (window.location.href = "login.html"), 1000);
+      });
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        const msg = document.getElementById("toast-message");
+        const icon = toast.querySelector("i");
+        msg.textContent = message;
+        toast.className = `toast ${type} show`;
+        icon.className =
+          type === "error"
+            ? "fas fa-exclamation-circle"
+            : type === "info"
+            ? "fas fa-info-circle"
+            : "fas fa-check-circle";
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+    </script>
+  </body>
+</html>
