@@ -1,4 +1,3 @@
-// Global variables
 let cart = [];
 let wishlist = [];
 let allProducts = [];
@@ -14,10 +13,14 @@ const USER_ID = 'user-' + Math.random().toString(36).substring(7);
 document.addEventListener('DOMContentLoaded', () => {
     console.log('ExoMart initialized!');
     console.log('API:', API_ENDPOINT);
-    
+
+    // Update auth UI (login/logout visibility)
+    updateAuthUI();
+
     // Hide loading screen after 2 seconds
     setTimeout(() => {
-        document.getElementById('loading-screen').classList.add('hidden');
+        const loader = document.getElementById('loading-screen');
+        if (loader) loader.classList.add('hidden');
     }, 2000);
     
     // Load products
@@ -29,6 +32,76 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show back to top button on scroll
     window.addEventListener('scroll', handleScroll);
 });
+
+// --- AUTH UI HANDLER ---
+// Updates Login / Logout visibility and small greeting
+function updateAuthUI() {
+    try {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        const loginLink = document.getElementById('login-link');
+        const logoutLink = document.getElementById('logout-link');
+
+        if (loginLink && logoutLink) {
+            if (user) {
+                loginLink.style.display = 'none';
+                logoutLink.style.display = 'inline-flex';
+            } else {
+                loginLink.style.display = 'inline-flex';
+                logoutLink.style.display = 'none';
+            }
+        }
+
+        // Optionally show a small greeting on top-right
+        const navActions = document.querySelector('.nav-actions');
+        if (navActions) {
+            // Remove existing greet if any
+            const existingGreet = document.querySelector('.user-greet');
+            if (existingGreet) existingGreet.remove();
+
+            if (user && user.name) {
+                const span = document.createElement('span');
+                span.className = 'user-greet';
+                span.textContent = `👋 ${user.name}`;
+                span.style.marginLeft = '0.75rem';
+                span.style.fontWeight = '600';
+                navActions.appendChild(span);
+            }
+        }
+    } catch (e) {
+        console.error('updateAuthUI error:', e);
+    }
+}
+
+// AUTH: Check user auth status (no redirect) - kept for compatibility in other workflows
+function checkAuthStatus() {
+    try {
+        // Only toggle UI; do NOT redirect to login. Dashboard is default.
+        updateAuthUI();
+    } catch (e) {
+        console.error('Auth check error:', e);
+    }
+}
+
+// AUTH: Logout function
+function logout() {
+    try {
+        localStorage.removeItem('loggedInUser');
+        // Clear local session-related state if needed (cart/wishlist kept or cleared depending on design)
+        // For now we keep cart/wishlist in-memory, but you can clear them if required:
+        // cart = []; wishlist = []; updateCartCount(); updateWishlistCount(); renderCart();
+        updateAuthUI();
+        showToast('Logged out successfully', 'success');
+        // Return to dashboard (index.html)
+        if (window.location.pathname && !window.location.pathname.endsWith('index.html')) {
+            window.location.href = 'index.html';
+        } else {
+            // if already on index, ensure sections react accordingly
+            showHome();
+        }
+    } catch (e) {
+        console.error('Logout error:', e);
+    }
+}
 
 // Initialize app features
 function initializeFeatures() {
@@ -56,13 +129,15 @@ function checkUserPreferences() {
     // Check for currency preference
     const currencyPreference = localStorage.getItem('currency');
     if (currencyPreference) {
-        document.getElementById('currency-select').value = currencyPreference;
+        const el = document.getElementById('currency-select');
+        if (el) el.value = currencyPreference;
     }
     
     // Check for language preference
     const languagePreference = localStorage.getItem('language');
     if (languagePreference) {
-        document.getElementById('language-select').value = languagePreference;
+        const el = document.getElementById('language-select');
+        if (el) el.value = languagePreference;
     }
 }
 
@@ -92,8 +167,10 @@ async function loadProducts() {
             // Populate categories
             populateCategories();
         } else {
-            document.getElementById('products-grid').innerHTML = 
-                '<p style="grid-column: 1/-1; text-align: center; padding: 3rem;">No products found. Add some via Admin!</p>';
+            const grid = document.getElementById('products-grid');
+            if (grid) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 3rem;">No products found. Add some via Admin!</p>';
+            }
         }
     } catch (error) {
         console.error('Error:', error);
@@ -195,6 +272,7 @@ function loadSampleProducts() {
 // Display products in grid
 function displayProducts(products) {
     const grid = document.getElementById('products-grid');
+    if (!grid) return;
     
     if (products.length === 0) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 3rem;">No products match your search.</p>';
@@ -207,6 +285,7 @@ function displayProducts(products) {
 // Display featured products
 function displayFeaturedProducts(products) {
     const grid = document.getElementById('featured-products-grid');
+    if (!grid) return;
     
     if (products.length === 0) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 3rem;">No featured products available.</p>';
@@ -303,6 +382,7 @@ function generateStars(rating) {
 function populateCategories() {
     const categories = [...new Set(allProducts.map(p => p.category))];
     const select = document.getElementById('category-filter');
+    if (!select) return;
     select.innerHTML = '<option value="">All Categories</option>' + 
         categories.map(c => `<option value="${c}">${c}</option>`).join('');
 }
@@ -316,13 +396,16 @@ function handleSearch(event) {
         showSearchSuggestions(query);
     } else {
         // Hide search suggestions
-        document.getElementById('search-suggestions').classList.remove('active');
+        const suggestionsEl = document.getElementById('search-suggestions');
+        if (suggestionsEl) suggestionsEl.classList.remove('active');
     }
 }
 
 // Perform search
 function performSearch() {
-    const query = document.getElementById('search-input').value.toLowerCase();
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    const query = input.value.toLowerCase();
     
     if (query) {
         const filtered = allProducts.filter(p => 
@@ -335,7 +418,8 @@ function performSearch() {
         showProducts();
         
         // Hide search suggestions
-        document.getElementById('search-suggestions').classList.remove('active');
+        const suggestionsEl = document.getElementById('search-suggestions');
+        if (suggestionsEl) suggestionsEl.classList.remove('active');
     }
 }
 
@@ -347,6 +431,7 @@ function showSearchSuggestions(query) {
     ).slice(0, 5);
     
     const suggestionsContainer = document.getElementById('search-suggestions');
+    if (!suggestionsContainer) return;
     
     if (suggestions.length > 0) {
         suggestionsContainer.innerHTML = suggestions.map(p => `
@@ -370,8 +455,10 @@ function showSearchSuggestions(query) {
 function selectSuggestion(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (product) {
-        document.getElementById('search-input').value = product.name;
-        document.getElementById('search-suggestions').classList.remove('active');
+        const input = document.getElementById('search-input');
+        if (input) input.value = product.name;
+        const suggestionsEl = document.getElementById('search-suggestions');
+        if (suggestionsEl) suggestionsEl.classList.remove('active');
         quickViewProduct(productId);
     }
 }
@@ -390,13 +477,15 @@ function filterByCategory(category) {
 
 // Filter products
 function filterProducts() {
-    const category = document.getElementById('category-filter').value;
+    const categoryEl = document.getElementById('category-filter');
+    const category = categoryEl ? categoryEl.value : '';
     displayProducts(category ? allProducts.filter(p => p.category === category) : allProducts);
 }
 
 // Sort products
 function sortProducts() {
-    const sortBy = document.getElementById('sort-select').value;
+    const sortEl = document.getElementById('sort-select');
+    const sortBy = sortEl ? sortEl.value : '';
     let sorted = [...allProducts];
     
     switch (sortBy) {
@@ -432,6 +521,7 @@ function quickViewProduct(productId) {
         : product.price.toFixed(2);
     
     const modalContent = document.getElementById('product-quick-view');
+    if (!modalContent) return;
     modalContent.innerHTML = `
         <div class="product-gallery">
             <img src="${product.image || 'https://via.placeholder.com/400/667eea/ffffff?text=' + encodeURIComponent(product.name)}" 
@@ -510,7 +600,8 @@ function quickViewProduct(productId) {
 // Change product image in quick view
 function changeImage(thumbnail) {
     // Update main image
-    document.getElementById('main-image').src = thumbnail.src;
+    const mainImage = document.getElementById('main-image');
+    if (mainImage) mainImage.src = thumbnail.src;
     
     // Update active thumbnail
     document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
@@ -519,12 +610,14 @@ function changeImage(thumbnail) {
 
 // Close product modal
 function closeProductModal() {
-    document.getElementById('product-modal').classList.remove('active');
+    const modal = document.getElementById('product-modal');
+    if (modal) modal.classList.remove('active');
 }
 
 // Increase quantity in modal
 function increaseQuantity() {
     const input = document.getElementById('product-quantity');
+    if (!input) return;
     const max = parseInt(input.getAttribute('max'));
     if (parseInt(input.value) < max) {
         input.value = parseInt(input.value) + 1;
@@ -534,6 +627,7 @@ function increaseQuantity() {
 // Decrease quantity in modal
 function decreaseQuantity() {
     const input = document.getElementById('product-quantity');
+    if (!input) return;
     if (parseInt(input.value) > 1) {
         input.value = parseInt(input.value) - 1;
     }
@@ -543,7 +637,8 @@ function decreaseQuantity() {
 function addToCartFromModal() {
     if (!currentProduct) return;
     
-    const quantity = parseInt(document.getElementById('product-quantity').value);
+    const quantityInput = document.getElementById('product-quantity');
+    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
     addToCart(currentProduct.id, quantity);
     closeProductModal();
 }
@@ -556,8 +651,17 @@ function addToWishlistFromModal() {
     closeProductModal();
 }
 
-// Add product to cart
+// Add product to cart (requires login)
 async function addToCart(productId, quantity = 1) {
+    // Check login
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!user) {
+        showToast('Please login to add items to cart', 'info');
+        // Optionally open login modal or redirect to login page:
+        // window.location.href = 'login.html';
+        return;
+    }
+
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
     
@@ -588,8 +692,15 @@ async function addToCart(productId, quantity = 1) {
     }
 }
 
-// Add product to wishlist
+// Add product to wishlist (requires login)
 function addToWishlist(productId) {
+    // Check login
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!user) {
+        showToast('Please login to add items to wishlist', 'info');
+        return;
+    }
+
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
     
@@ -618,23 +729,29 @@ function compareProduct(productId) {
 
 // Update cart count
 function updateCartCount() {
-    document.getElementById('cart-count').textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
+    const el = document.getElementById('cart-count');
+    if (el) el.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
 }
 
 // Update wishlist count
 function updateWishlistCount() {
-    document.getElementById('wishlist-count').textContent = wishlist.length;
+    const el = document.getElementById('wishlist-count');
+    if (el) el.textContent = wishlist.length;
 }
 
 // Render cart
 function renderCart() {
     const container = document.getElementById('cart-items');
+    if (!container) return;
     
     if (cart.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 3rem;">Cart is empty</p>';
-        document.getElementById('cart-subtotal').textContent = '$0.00';
-        document.getElementById('cart-tax').textContent = '$0.00';
-        document.getElementById('cart-total').textContent = '$0.00';
+        const subtotalEl = document.getElementById('cart-subtotal');
+        const taxEl = document.getElementById('cart-tax');
+        const totalEl = document.getElementById('cart-total');
+        if (subtotalEl) subtotalEl.textContent = '$0.00';
+        if (taxEl) taxEl.textContent = '$0.00';
+        if (totalEl) totalEl.textContent = '$0.00';
         return;
     }
     
@@ -674,9 +791,12 @@ function renderCart() {
     const tax = subtotal * 0.1;
     const total = subtotal + tax;
     
-    document.getElementById('cart-subtotal').textContent = '$' + subtotal.toFixed(2);
-    document.getElementById('cart-tax').textContent = '$' + tax.toFixed(2);
-    document.getElementById('cart-total').textContent = '$' + total.toFixed(2);
+    const subtotalEl = document.getElementById('cart-subtotal');
+    const taxEl = document.getElementById('cart-tax');
+    const totalEl = document.getElementById('cart-total');
+    if (subtotalEl) subtotalEl.textContent = '$' + subtotal.toFixed(2);
+    if (taxEl) taxEl.textContent = '$' + tax.toFixed(2);
+    if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
 }
 
 // Update cart item quantity
@@ -719,6 +839,13 @@ function clearCart() {
 
 // Checkout
 function checkout() {
+    // require login for checkout
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!user) {
+        showToast('Please login to proceed to checkout', 'info');
+        return;
+    }
+
     if (cart.length === 0) {
         showToast('Cart is empty!', 'error');
         return;
@@ -804,6 +931,7 @@ async function deleteProduct(productId) {
 // Render admin products list
 function renderAdminProducts() {
     const container = document.getElementById('admin-products-list');
+    if (!container) return;
     
     if (allProducts.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">No products found</p>';
@@ -831,15 +959,18 @@ function renderAdminProducts() {
 
 // Update admin stats
 function updateAdminStats() {
-    document.getElementById('admin-products').textContent = allProducts.length;
+    const prodEl = document.getElementById('admin-products');
+    if (prodEl) prodEl.textContent = allProducts.length;
     const revenue = allProducts.reduce((sum, p) => sum + (p.price * p.stock), 0);
-    document.getElementById('admin-revenue').textContent = '$' + revenue.toLocaleString();
+    const revEl = document.getElementById('admin-revenue');
+    if (revEl) revEl.textContent = '$' + revenue.toLocaleString();
 }
 
 // Show toast notification
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
+    if (!toast || !toastMessage) return;
     
     // Set message and type
     toastMessage.textContent = message;
@@ -847,12 +978,14 @@ function showToast(message, type = 'success') {
     
     // Set icon based on type
     const icon = toast.querySelector('i');
-    if (type === 'success') {
-        icon.className = 'fas fa-check-circle';
-    } else if (type === 'error') {
-        icon.className = 'fas fa-exclamation-circle';
-    } else if (type === 'info') {
-        icon.className = 'fas fa-info-circle';
+    if (icon) {
+        if (type === 'success') {
+            icon.className = 'fas fa-check-circle';
+        } else if (type === 'error') {
+            icon.className = 'fas fa-exclamation-circle';
+        } else if (type === 'info') {
+            icon.className = 'fas fa-info-circle';
+        }
     }
     
     // Hide after 3 seconds
@@ -863,7 +996,8 @@ function showToast(message, type = 'success') {
 
 // Close premium banner
 function closeBanner() {
-    document.getElementById('premium-banner').style.display = 'none';
+    const banner = document.getElementById('premium-banner');
+    if (banner) banner.style.display = 'none';
 }
 
 // Toggle dark mode
@@ -878,7 +1012,8 @@ function toggleDarkMode() {
 // Enable dark mode
 function enableDarkMode() {
     document.body.classList.add('dark-mode');
-    document.getElementById('dark-mode-icon').className = 'fas fa-sun';
+    const icon = document.getElementById('dark-mode-icon');
+    if (icon) icon.className = 'fas fa-sun';
     localStorage.setItem('darkMode', 'true');
     isDarkMode = true;
 }
@@ -886,7 +1021,8 @@ function enableDarkMode() {
 // Disable dark mode
 function disableDarkMode() {
     document.body.classList.remove('dark-mode');
-    document.getElementById('dark-mode-icon').className = 'fas fa-moon';
+    const icon = document.getElementById('dark-mode-icon');
+    if (icon) icon.className = 'fas fa-moon';
     localStorage.setItem('darkMode', 'false');
     isDarkMode = false;
 }
@@ -894,6 +1030,7 @@ function disableDarkMode() {
 // Initialize currency converter
 function initializeCurrencyConverter() {
     const currencySelect = document.getElementById('currency-select');
+    if (!currencySelect) return;
     currencySelect.addEventListener('change', function() {
         const selectedCurrency = this.value;
         localStorage.setItem('currency', selectedCurrency);
@@ -906,6 +1043,7 @@ function initializeCurrencyConverter() {
 // Initialize language selector
 function initializeLanguageSelector() {
     const languageSelect = document.getElementById('language-select');
+    if (!languageSelect) return;
     languageSelect.addEventListener('change', function() {
         const selectedLanguage = this.value;
         localStorage.setItem('language', selectedLanguage);
@@ -920,7 +1058,8 @@ function initializeSearchSuggestions() {
     // Close search suggestions when clicking outside
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.nav-search')) {
-            document.getElementById('search-suggestions').classList.remove('active');
+            const suggestions = document.getElementById('search-suggestions');
+            if (suggestions) suggestions.classList.remove('active');
         }
     });
 }
@@ -931,17 +1070,21 @@ function handleScroll() {
     const mainNav = document.getElementById('main-nav');
     
     // Show/hide back to top button
-    if (window.scrollY > 300) {
-        backToTopButton.classList.add('show');
-    } else {
-        backToTopButton.classList.remove('show');
+    if (backToTopButton) {
+        if (window.scrollY > 300) {
+            backToTopButton.classList.add('show');
+        } else {
+            backToTopButton.classList.remove('show');
+        }
     }
     
     // Add scrolled class to main nav
-    if (window.scrollY > 50) {
-        mainNav.classList.add('scrolled');
-    } else {
-        mainNav.classList.remove('scrolled');
+    if (mainNav) {
+        if (window.scrollY > 50) {
+            mainNav.classList.add('scrolled');
+        } else {
+            mainNav.classList.remove('scrolled');
+        }
     }
 }
 
@@ -1034,19 +1177,24 @@ async function playTextToSpeech(text) {
   }
 }
 
-// Switch between sections
+
 function switchSection(id) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
     
-    // Update active nav link
+
     document.querySelectorAll('.nav-action-btn').forEach(a => a.classList.remove('active'));
     
-    // Find and activate the corresponding nav link
+
     const navLinks = document.querySelectorAll('.nav-action-btn');
     navLinks.forEach(link => {
-        if (link.onclick && link.onclick.toString().includes(id)) {
-            link.classList.add('active');
+        try {
+            if (link.onclick && link.onclick.toString().includes(id)) {
+                link.classList.add('active');
+            }
+        } catch (e) {
+            
         }
     });
 }
