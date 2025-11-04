@@ -1,0 +1,116 @@
+service: exomart-backend
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: prod
+  environment:
+    DYNAMODB_TABLE: ${self:service}-products-${self:provider.stage}
+    CART_TABLE: ${self:service}-cart-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+            - s3:*
+            - cloudwatch:*
+            - logs:*
+            - polly:SynthesizeSpeech
+          Resource: "*"
+
+functions:
+  getProducts:
+    handler: src/handlers/products.getAll
+    events:
+      - http:
+          path: products
+          method: get
+          cors: true
+
+  getProduct:
+    handler: src/handlers/products.getById
+    events:
+      - http:
+          path: products/{id}
+          method: get
+          cors: true
+
+  createProduct:
+    handler: src/handlers/products.create
+    events:
+      - http:
+          path: products
+          method: post
+          cors: true
+
+  updateProduct:
+    handler: src/handlers/products.update
+    events:
+      - http:
+          path: products/{id}
+          method: put
+          cors: true
+
+  deleteProduct:
+    handler: src/handlers/products.delete
+    events:
+      - http:
+          path: products/{id}
+          method: delete
+          cors: true
+
+  addToCart:
+    handler: src/handlers/cart.add
+    events:
+      - http:
+          path: cart
+          method: post
+          cors: true
+
+  getCart:
+    handler: src/handlers/cart.get
+    events:
+      - http:
+          path: cart/{userId}
+          method: get
+          cors: true
+
+  pollySpeak:
+    handler: src/handlers/polly.speak
+    events:
+      - http:
+          path: polly/speak
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    CartTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CART_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: productId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: productId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST

@@ -1,0 +1,17 @@
+{
+"name": "exomart-backend",
+"version": "1.0.0",
+"description": "ExoMart E-Commerce Backend",
+"main": "index.js",
+"scripts": {
+"deploy": "serverless deploy"
+},
+"dependencies": {
+"aws-sdk": "^2.1520.0",
+"mysql2": "^3.6.5",
+"uuid": "^9.0.1"
+},
+"devDependencies": {
+"serverless": "^3.38.0"
+}
+}
