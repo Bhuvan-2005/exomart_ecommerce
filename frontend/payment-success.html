@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful | ExoMart</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body class="success-body">
+    <div class="payment-success-wrapper">
+      <div class="payment-success-card glass-panel">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>Payment Successful</h1>
+        <p class="success-message">Thank you for your purchase! A detailed receipt has been emailed to you.</p>
+
+        <div class="receipt-grid">
+          <div>
+            <span class="receipt-label">Payment ID</span>
+            <span id="receipt-id">-</span>
+          </div>
+          <div>
+            <span class="receipt-label">Status</span>
+            <span id="receipt-status">-</span>
+          </div>
+          <div>
+            <span class="receipt-label">Processed</span>
+            <span id="receipt-date">-</span>
+          </div>
+          <div>
+            <span class="receipt-label">Paid By</span>
+            <span id="receipt-name">-</span>
+          </div>
+          <div>
+            <span class="receipt-label">Email</span>
+            <span id="receipt-email">-</span>
+          </div>
+          <div>
+            <span class="receipt-label">Amount Paid</span>
+            <span id="receipt-total" class="receipt-total">-</span>
+          </div>
+        </div>
+
+        <div class="receipt-card-details" id="receipt-card"></div>
+
+        <div class="receipt-items" id="receipt-items"></div>
+
+        <div class="success-actions">
+          <button class="btn btn-primary" id="success-shop">
+            <i class="fas fa-shopping-bag"></i> Continue Shopping
+          </button>
+          <button class="btn btn-outline" id="success-account">
+            <i class="fas fa-user"></i> Go to Account
+          </button>
+          <button class="btn btn-secondary" id="success-print">
+            <i class="fas fa-print"></i> Print Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="payment-success.js"></script>
+  </body>
+</html>
+

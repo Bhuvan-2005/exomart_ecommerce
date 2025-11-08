@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Wireless Bluetooth Headphones",
+    "description": "Premium noise-cancelling wireless headphones with 30-hour battery life, comfortable over-ear design, and crystal-clear audio quality. Perfect for music lovers and professionals.",
+    "price": 9999,
+    "stock": 45,
+    "image": ""
+  },
+  {
+    "name": "Smart Fitness Watch",
+    "description": "Advanced fitness tracking watch with heart rate monitor, GPS, sleep tracking, and water resistance up to 50 meters. Compatible with iOS and Android devices.",
+    "price": 18999,
+    "stock": 32,
+    "image": ""
+  },
+  {
+    "name": "Organic Coffee Beans - 1kg",
+    "description": "Single-origin Arabica coffee beans, freshly roasted for rich flavor and aroma. Sustainably sourced from premium coffee farms. Perfect for espresso and filter coffee.",
+    "price": 1899,
+    "stock": 78,
+    "image": ""
+  },
+  {
+    "name": "Ergonomic Office Chair",
+    "description": "High-back ergonomic office chair with lumbar support, adjustable armrests, and 360-degree swivel. Features breathable mesh material for comfort during long work sessions.",
+    "price": 14999,
+    "stock": 15,
+    "image": ""
+  },
+  {
+    "name": "Portable Power Bank - 20000mAh",
+    "description": "High-capacity power bank with fast charging technology, USB-C and USB-A ports. Can charge smartphones up to 4 times. Compact design perfect for travel.",
+    "price": 2499,
+    "stock": 67,
+    "image": ""
+  },
+  {
+    "name": "Ceramic Non-Stick Cookware Set",
+    "description": "10-piece ceramic cookware set including pots, pans, and lids. Non-toxic, non-stick surface that requires less oil. Dishwasher safe and oven safe up to 400°F.",
+    "price": 5999,
+    "stock": 28,
+    "image": ""
+  },
+  {
+    "name": "Yoga Mat - Premium Thick",
+    "description": "Extra thick 10mm yoga mat with non-slip surface for all yoga poses. Made from eco-friendly TPE material. Includes carrying strap for easy transportation.",
+    "price": 2999,
+    "stock": 54,
+    "image": ""
+  },
+  {
+    "name": "LED Desk Lamp with USB Charging",
+    "description": "Modern LED desk lamp with adjustable brightness and color temperature. Features USB charging port and touch controls. Energy-efficient with long-lasting LED bulbs.",
+    "price": 3499,
+    "stock": 41,
+    "image": ""
+  },
+  {
+    "name": "Wireless Phone Charger Stand",
+    "description": "Fast wireless charging stand compatible with iPhone and Android phones. Adjustable viewing angle, supports up to 15W charging speed. Sleek, modern design.",
+    "price": 2299,
+    "stock": 89,
+    "image": ""
+  },
+  {
+    "name": "Premium Backpack - Water Resistant",
+    "description": "Durable backpack with multiple compartments, laptop sleeve, and water-resistant material. Ergonomic padded straps for comfort. Perfect for work, travel, or school.",
+    "price": 4999,
+    "stock": 36,
+    "image": ""
+  }
+]

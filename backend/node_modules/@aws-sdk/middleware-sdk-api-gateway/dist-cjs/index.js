@@ -1,0 +1,33 @@
+'use strict';
+
+var protocolHttp = require('@smithy/protocol-http');
+
+function acceptHeaderMiddleware() {
+    return (next) => async (args) => {
+        const { request } = args;
+        if (protocolHttp.HttpRequest.isInstance(request)) {
+            if (request.headers?.accept === undefined) {
+                request.headers.accept = "application/json";
+            }
+        }
+        return next({
+            ...args,
+            request,
+        });
+    };
+}
+const acceptHeaderMiddlewareOptions = {
+    step: "build",
+    tags: ["SET_ACCEPT_HEADER", "ACCEPT_HEADER"],
+    name: "acceptHeaderMiddleware",
+    override: true,
+};
+const getAcceptHeaderPlugin = (unused) => ({
+    applyToStack: (clientStack) => {
+        clientStack.add(acceptHeaderMiddleware(), acceptHeaderMiddlewareOptions);
+    },
+});
+
+exports.acceptHeaderMiddleware = acceptHeaderMiddleware;
+exports.acceptHeaderMiddlewareOptions = acceptHeaderMiddlewareOptions;
+exports.getAcceptHeaderPlugin = getAcceptHeaderPlugin;

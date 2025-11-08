@@ -1,0 +1,49 @@
+Product Name: Wireless Bluetooth Headphones
+Description: Premium noise-cancelling wireless headphones with 30-hour battery life, comfortable over-ear design, and crystal-clear audio quality. Perfect for music lovers and professionals.
+Price: 9999
+Stock: 45
+
+Product Name: Smart Fitness Watch
+Description: Advanced fitness tracking watch with heart rate monitor, GPS, sleep tracking, and water resistance up to 50 meters. Compatible with iOS and Android devices.
+Price: 18999
+Stock: 32
+
+Product Name: Organic Coffee Beans - 1kg
+Description: Single-origin Arabica coffee beans, freshly roasted for rich flavor and aroma. Sustainably sourced from premium coffee farms. Perfect for espresso and filter coffee.
+Price: 1899
+Stock: 78
+
+Product Name: Ergonomic Office Chair
+Description: High-back ergonomic office chair with lumbar support, adjustable armrests, and 360-degree swivel. Features breathable mesh material for comfort during long work sessions.
+Price: 14999
+Stock: 15
+
+Product Name: Portable Power Bank - 20000mAh
+Description: High-capacity power bank with fast charging technology, USB-C and USB-A ports. Can charge smartphones up to 4 times. Compact design perfect for travel.
+Price: 2499
+Stock: 67
+
+Product Name: Ceramic Non-Stick Cookware Set
+Description: 10-piece ceramic cookware set including pots, pans, and lids. Non-toxic, non-stick surface that requires less oil. Dishwasher safe and oven safe up to 400°F.
+Price: 5999
+Stock: 28
+
+Product Name: Yoga Mat - Premium Thick
+Description: Extra thick 10mm yoga mat with non-slip surface for all yoga poses. Made from eco-friendly TPE material. Includes carrying strap for easy transportation.
+Price: 2999
+Stock: 54
+
+Product Name: LED Desk Lamp with USB Charging
+Description: Modern LED desk lamp with adjustable brightness and color temperature. Features USB charging port and touch controls. Energy-efficient with long-lasting LED bulbs.
+Price: 3499
+Stock: 41
+
+Product Name: Wireless Phone Charger Stand
+Description: Fast wireless charging stand compatible with iPhone and Android phones. Adjustable viewing angle, supports up to 15W charging speed. Sleek, modern design.
+Price: 2299
+Stock: 89
+
+Product Name: Premium Backpack - Water Resistant
+Description: Durable backpack with multiple compartments, laptop sleeve, and water-resistant material. Ergonomic padded straps for comfort. Perfect for work, travel, or school.
+Price: 4999
+Stock: 36
