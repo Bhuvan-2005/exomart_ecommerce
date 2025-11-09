@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Check and apply dark mode preference
+  const darkModePreference = localStorage.getItem('darkMode');
+  if (darkModePreference === 'true') {
+    document.body.classList.add('dark-mode');
+  } else if (darkModePreference === 'false') {
+    document.body.classList.remove('dark-mode');
+  } else {
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.body.classList.add('dark-mode');
+    }
+  }
+
   const raw = localStorage.getItem('lastPaymentReceipt');
 
   if (!raw) {

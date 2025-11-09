@@ -1813,14 +1813,16 @@ body.dark-mode {
 
 /* Payment Success Page */
 .success-body {
-    background: radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.3), transparent 55%),
-                radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.25), transparent 50%),
-                #050714;
+    background: var(--bg-light);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text);
+}
+
+body.dark-mode .success-body {
+    background: var(--bg-light);
 }
 
 .payment-success-wrapper {
@@ -1836,11 +1838,21 @@ body.dark-mode {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+}
+
+.payment-success-card h1 {
+    color: var(--text);
+    font-size: 2.5em;
+    font-weight: 700;
+    margin: 0;
 }
 
 .success-icon {
     font-size: 4rem;
-    color: #34d399;
+    color: var(--success);
 }
 
 .success-message {
@@ -1858,14 +1870,20 @@ body.dark-mode {
 .receipt-grid > div {
     padding: 1rem;
     border-radius: 18px;
-    background: rgba(15, 23, 42, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.receipt-grid > div span:not(.receipt-label) {
+    color: var(--text);
+    font-weight: 600;
 }
 
 .receipt-label {
     display: block;
     font-size: 0.75em;
-    color: rgba(226, 232, 240, 0.6);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 0.3rem;
@@ -1874,7 +1892,7 @@ body.dark-mode {
 .receipt-total {
     font-weight: 800;
     font-size: 1.35em;
-    color: rgba(129, 140, 248, 0.95);
+    color: var(--primary);
 }
 
 .receipt-card {
@@ -1883,6 +1901,21 @@ body.dark-mode {
     gap: 1rem;
     padding: 1.5rem;
     border-radius: 22px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+.receipt-card > div {
+    color: var(--text);
+}
+
+.receipt-card .receipt-label {
+    color: var(--text-muted);
+}
+
+.receipt-card span:not(.receipt-label) {
+    color: var(--text);
+    font-weight: 600;
 }
 
 .receipt-items {
@@ -1894,6 +1927,7 @@ body.dark-mode {
 
 .receipt-items h3 {
     font-size: 1.4em;
+    color: var(--text);
 }
 
 .receipt-items-list {
@@ -1908,12 +1942,13 @@ body.dark-mode {
     align-items: center;
     padding: 1rem;
     border-radius: 18px;
-    background: rgba(15, 23, 42, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
 }
 
 .receipt-item h4 {
     font-size: 1.05em;
+    color: var(--text);
 }
 
 .receipt-item p {
@@ -1923,7 +1958,7 @@ body.dark-mode {
 
 .receipt-item-total {
     font-weight: 700;
-    color: rgba(129, 140, 248, 0.95);
+    color: var(--primary);
 }
 
 .receipt-summary-totals {
@@ -1932,6 +1967,12 @@ body.dark-mode {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+.receipt-summary-totals div span {
+    color: var(--text);
 }
 
 .receipt-summary-totals div {
@@ -1970,6 +2011,12 @@ body.dark-mode {
         background: white;
         border: 1px solid #ddd;
     }
+}
+
+.glass-panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
 }
 
 /* Modal */
