@@ -2153,8 +2153,20 @@ function initializeMockVoiceRecognition() {
         // Enhanced configuration for staging environments
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = 'en-US'; // Most compatible language
+        
+        // Set language based on current locale
+        const mockLang = getSpeechRecognitionLang(lexCurrentLocale);
+        recognition.lang = mockLang;
         recognition.maxAlternatives = 1;
+        
+        // Set proper grammar for better recognition
+        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+        if (SpeechGrammarList) {
+            const grammar = '#JSGF V1.0; grammar commands; public <command> = show | search | add | remove | view | cart | wishlist | deals | products | help | thank you | yes | no | hello | goodbye;';
+            const speechRecognitionList = new SpeechGrammarList();
+            speechRecognitionList.addFromString(grammar, 1);
+            recognition.grammars = speechRecognitionList;
+        }
 
         // Add timeout handling
         let recognitionTimeout;
@@ -2377,8 +2389,18 @@ function initializeVoiceRecognition() {
             recognition.continuous = false;
             recognition.interimResults = false;
 
-            // Set default language to English (more reliable than Hindi)
-            recognition.lang = 'en-US';
+            // Set proper grammar for better recognition
+            const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+            if (SpeechGrammarList) {
+                const grammar = '#JSGF V1.0; grammar commands; public <command> = show | search | add | remove | view | cart | wishlist | deals | products | help | thank you | yes | no | hello | goodbye;';
+                const speechRecognitionList = new SpeechGrammarList();
+                speechRecognitionList.addFromString(grammar, 1);
+                recognition.grammars = speechRecognitionList;
+            }
+
+            // Set default language based on current locale
+            const defaultLang = getSpeechRecognitionLang(lexCurrentLocale);
+            recognition.lang = defaultLang;
 
             console.log('Real voice recognition initialized successfully with language:', recognition.lang);
 
@@ -2504,10 +2526,10 @@ function toggleVoiceInput() {
         updateVoiceInputButton();
     } else {
         try {
-            // Always use English for recognition (most reliable)
-            // User can type in any language, detection will work
-            recognition.lang = 'en-US';
-            console.log('Starting voice input with English recognition');
+            // Use appropriate language based on detected locale
+            const detectedLang = getSpeechRecognitionLang(lexCurrentLocale);
+            recognition.lang = detectedLang;
+            console.log(`Starting voice input with ${detectedLang} recognition`);
 
             recognition.start();
         } catch (error) {
