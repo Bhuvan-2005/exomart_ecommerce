@@ -2,7 +2,9 @@ const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
+const sns = new AWS.SNS({ region: process.env.AWS_REGION || 'us-east-1' });
 const PAYMENTS_TABLE = process.env.PAYMENTS_TABLE;
+const PAYMENT_TOPIC_ARN = process.env.PAYMENT_TOPIC_ARN; // SNS Topic ARN for payment notifications
 
 const response = (statusCode, body) => ({
   statusCode,
@@ -129,6 +131,67 @@ module.exports.process = async (event) => {
       TableName: PAYMENTS_TABLE,
       Item: paymentRecord,
     }).promise();
+
+    // Send SNS notification for payment success
+    if (PAYMENT_TOPIC_ARN) {
+      try {
+        const userEmail = metadata.email || null;
+        
+        const paymentMethod = method === 'card' 
+          ? `Card ending in ${paymentMethodData.card.last4}`
+          : method === 'upi'
+          ? `UPI (${paymentMethodData.upi.provider})`
+          : `Net Banking (${paymentMethodData.netbanking.bank})`;
+
+        const message = {
+          paymentId,
+          userId,
+          orderId: orderId || 'N/A',
+          amount,
+          currency,
+          method: paymentMethod,
+          status: 'success',
+          itemsCount: items.length,
+          processedAt: now,
+          email: userEmail,
+        };
+
+        await sns.publish({
+          TopicArn: PAYMENT_TOPIC_ARN,
+          Subject: `Payment Successful - ₹${amount} - ExoMart`,
+          Message: JSON.stringify({
+            default: JSON.stringify(message, null, 2),
+            email: `
+Payment Successful - ExoMart
+
+Dear Customer,
+
+Your payment of ₹${amount} has been processed successfully.
+
+Payment Details:
+- Payment ID: ${paymentId}
+- Order ID: ${orderId || 'N/A'}
+- Amount: ₹${amount} ${currency}
+- Payment Method: ${paymentMethod}
+- Items: ${items.length} item(s)
+- Date: ${new Date(now).toLocaleString('en-IN')}
+
+Thank you for your purchase!
+
+Best regards,
+ExoMart Team
+            `.trim(),
+            sms: `Payment successful! ₹${amount} paid via ${paymentMethod}. Payment ID: ${paymentId.substring(0, 8)}. - ExoMart`,
+          }, null, 2),
+          MessageStructure: 'json',
+        }).promise();
+
+        console.log(`Payment notification sent to SNS topic: ${PAYMENT_TOPIC_ARN}`);
+      } catch (snsError) {
+        // Don't fail payment if notification fails
+        console.error('Error sending payment notification:', snsError);
+      }
+    }
 
     return response(201, {
       success: true,

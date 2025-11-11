@@ -22,7 +22,7 @@ const response = (statusCode, body) => ({
 module.exports.chat = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
-    const { message, sessionId, userId } = body;
+    const { message, sessionId, userId, locale } = body;
 
     if (!message || !message.trim()) {
       return response(400, {
@@ -34,7 +34,8 @@ module.exports.chat = async (event) => {
     // Get Lex bot configuration from environment variables
     const botId = process.env.LEX_BOT_ID;
     const botAliasId = process.env.LEX_BOT_ALIAS_ID;
-    const localeId = process.env.LEX_LOCALE_ID || 'en_US';
+    // Use provided locale or fallback to default (supports both en_US and hi_IN)
+    const localeId = locale || process.env.LEX_LOCALE_ID || 'en_US';
 
     if (!botId || !botAliasId) {
       console.error('Lex configuration missing. Please set LEX_BOT_ID and LEX_BOT_ALIAS_ID');

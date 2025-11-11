@@ -77,12 +77,33 @@ module.exports.register = async (event) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const timestamp = new Date().toISOString();
 
+    // Check if email is verified (OTP verification)
+    const OTP_TABLE = process.env.OTP_TABLE;
+    
+    if (OTP_TABLE) {
+      const otpResult = await dynamodb
+        .get({
+          TableName: OTP_TABLE,
+          Key: { email },
+        })
+        .promise();
+
+      if (!otpResult.Item || !otpResult.Item.verified) {
+        return response(400, {
+          success: false,
+          message: 'Please verify your email address first. Check your email for the OTP.',
+          requiresVerification: true,
+        });
+      }
+    }
+
     const userItem = {
       email,
       userId: uuidv4(),
       name,
       passwordHash,
       provider: 'password',
+      emailVerified: true,
       createdAt: timestamp,
       updatedAt: timestamp,
     };

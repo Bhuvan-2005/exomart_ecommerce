@@ -6,6 +6,10 @@
     <title>ExoMart - Premium Cloud E-Commerce</title>
     <link rel="stylesheet" href="styles.css" />
     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap"
       rel="stylesheet"
     />
@@ -837,6 +841,11 @@
           <span>AI Assistant</span>
           <span class="lex-chat-status" id="lex-chat-status">Online</span>
         </div>
+        <div class="lex-chat-controls">
+          <button class="lex-voice-toggle" id="lex-voice-toggle" onclick="event.stopPropagation(); toggleVoiceOutput(); return false;" title="Toggle voice output">
+            <i class="fas fa-volume-up"></i>
+          </button>
+        </div>
         <button class="lex-chat-close" onclick="event.stopPropagation(); event.preventDefault(); toggleLexChat(); return false;">
           <i class="fas fa-times" id="lex-chat-toggle-icon"></i>
         </button>
@@ -861,6 +870,9 @@
           </div>
         </div>
         <div class="lex-chat-input-container">
+          <button class="lex-voice-input" id="lex-voice-input-btn" onclick="event.stopPropagation(); toggleVoiceInput(); return false;" title="Voice input">
+            <i class="fas fa-microphone"></i>
+          </button>
           <input 
             type="text" 
             id="lex-chat-input" 

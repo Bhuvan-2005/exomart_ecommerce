@@ -10,10 +10,15 @@ provider:
     CART_TABLE: ${self:service}-cart-${self:provider.stage}
     USERS_TABLE: ${self:service}-users-${self:provider.stage}
     PAYMENTS_TABLE: ${self:service}-payments-${self:provider.stage}
+    OTP_TABLE: ${self:service}-otp-${self:provider.stage}
     # Lex Configuration
     LEX_BOT_ID: EVGL0ZY90T
     LEX_BOT_ALIAS_ID: TSTALIASID
-    LEX_LOCALE_ID: en_US
+    LEX_LOCALE_ID: hi_IN
+    # SES Configuration
+    FROM_EMAIL: gbindra21@gmail.com
+    # SNS Configuration
+    PAYMENT_TOPIC_ARN: arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications
   iam:
     role:
       statements:
@@ -26,6 +31,13 @@ provider:
             - polly:SynthesizeSpeech
             - lex:RecognizeText
             - lex:RecognizeUtterance
+            - ses:SendEmail
+            - ses:SendRawEmail
+            - ses:GetSendQuota
+            - ses:GetSendStatistics
+            - sns:Publish
+            - sns:Subscribe
+            - sns:CreateTopic
           Resource: "*"
 
 functions:
@@ -133,6 +145,22 @@ functions:
           method: post
           cors: true
 
+  sendOTP:
+    handler: src/handlers/otp.send
+    events:
+      - http:
+          path: otp/send
+          method: post
+          cors: true
+
+  verifyOTP:
+    handler: src/handlers/otp.verify
+    events:
+      - http:
+          path: otp/verify
+          method: post
+          cors: true
+
 resources:
   Resources:
     ProductsTable:
@@ -186,3 +214,18 @@ resources:
           - AttributeName: paymentId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+    OTPTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.OTP_TABLE}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TimeToLiveSpecification:
+          Enabled: true
+          AttributeName: expiresAt

@@ -149,6 +149,18 @@
         "LogGroupName": "/aws/lambda/exomart-backend-prod-lexChat"
       }
     },
+    "SendOTPLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/exomart-backend-prod-sendOTP"
+      }
+    },
+    "VerifyOTPLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/exomart-backend-prod-verifyOTP"
+      }
+    },
     "IamRoleLambdaExecution": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -216,7 +228,14 @@
                     "logs:*",
                     "polly:SynthesizeSpeech",
                     "lex:RecognizeText",
-                    "lex:RecognizeUtterance"
+                    "lex:RecognizeUtterance",
+                    "ses:SendEmail",
+                    "ses:SendRawEmail",
+                    "ses:GetSendQuota",
+                    "ses:GetSendStatistics",
+                    "sns:Publish",
+                    "sns:Subscribe",
+                    "sns:CreateTopic"
                   ],
                   "Resource": "*"
                 }
@@ -247,7 +266,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/products.getAll",
         "Runtime": "nodejs20.x",
@@ -260,9 +279,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -283,7 +305,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/products.getById",
         "Runtime": "nodejs20.x",
@@ -296,9 +318,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -319,7 +344,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/products.create",
         "Runtime": "nodejs20.x",
@@ -332,9 +357,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -355,7 +383,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/products.update",
         "Runtime": "nodejs20.x",
@@ -368,9 +396,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -391,7 +422,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/products.delete",
         "Runtime": "nodejs20.x",
@@ -404,9 +435,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -427,7 +461,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/cart.add",
         "Runtime": "nodejs20.x",
@@ -440,9 +474,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -463,7 +500,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/cart.get",
         "Runtime": "nodejs20.x",
@@ -476,9 +513,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -499,7 +539,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/polly.speak",
         "Runtime": "nodejs20.x",
@@ -512,9 +552,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -535,7 +578,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/auth.register",
         "Runtime": "nodejs20.x",
@@ -548,9 +591,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -571,7 +617,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/auth.login",
         "Runtime": "nodejs20.x",
@@ -584,9 +630,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -607,7 +656,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/payments.process",
         "Runtime": "nodejs20.x",
@@ -620,9 +669,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -643,7 +695,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/payments.get",
         "Runtime": "nodejs20.x",
@@ -656,9 +708,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -679,7 +734,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/exomart-backend/prod/1762583704990-2025-11-08T06:35:04.990Z/exomart-backend.zip"
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
         },
         "Handler": "src/handlers/lex.chat",
         "Runtime": "nodejs20.x",
@@ -692,9 +747,12 @@
             "CART_TABLE": "exomart-backend-cart-prod",
             "USERS_TABLE": "exomart-backend-users-prod",
             "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
             "LEX_BOT_ID": "EVGL0ZY90T",
             "LEX_BOT_ALIAS_ID": "TSTALIASID",
-            "LEX_LOCALE_ID": "en_US"
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
           }
         },
         "Role": {
@@ -708,134 +766,232 @@
         "LexChatLogGroup"
       ]
     },
-    "GetProductsLambdaVersionSoMloqla8AizqWZEMzZxxQRhLVWWvJ4JfubEELlOwI": {
+    "SendOTPLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
+        },
+        "Handler": "src/handlers/otp.send",
+        "Runtime": "nodejs20.x",
+        "FunctionName": "exomart-backend-prod-sendOTP",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DYNAMODB_TABLE": "exomart-backend-products-prod",
+            "CART_TABLE": "exomart-backend-cart-prod",
+            "USERS_TABLE": "exomart-backend-users-prod",
+            "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
+            "LEX_BOT_ID": "EVGL0ZY90T",
+            "LEX_BOT_ALIAS_ID": "TSTALIASID",
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "SendOTPLogGroup"
+      ]
+    },
+    "VerifyOTPLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/exomart-backend/prod/1762811133863-2025-11-10T21:45:33.863Z/exomart-backend.zip"
+        },
+        "Handler": "src/handlers/otp.verify",
+        "Runtime": "nodejs20.x",
+        "FunctionName": "exomart-backend-prod-verifyOTP",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DYNAMODB_TABLE": "exomart-backend-products-prod",
+            "CART_TABLE": "exomart-backend-cart-prod",
+            "USERS_TABLE": "exomart-backend-users-prod",
+            "PAYMENTS_TABLE": "exomart-backend-payments-prod",
+            "OTP_TABLE": "exomart-backend-otp-prod",
+            "LEX_BOT_ID": "EVGL0ZY90T",
+            "LEX_BOT_ALIAS_ID": "TSTALIASID",
+            "LEX_LOCALE_ID": "hi_IN",
+            "FROM_EMAIL": "gbindra21@gmail.com",
+            "PAYMENT_TOPIC_ARN": "arn:aws:sns:us-east-1:346817100303:exomart-payment-notifications"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "VerifyOTPLogGroup"
+      ]
+    },
+    "GetProductsLambdaVersionBIJmQY23lmtyOMdW2p82qUqZNCHOfx81iI9zqqUszwg": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetProductsLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "GetProductLambdaVersioniYFvXYObl1BGhLbY9cvZmQgNbO80A0mOUfvUZY": {
+    "GetProductLambdaVersionchX3z93FaZ8PzlRxJlfwJ0XJoz7W3UfkhTZgRsGY4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetProductLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "CreateProductLambdaVersioncacsD6dNfUCjiOAx69qzLp0NcXjVsaWweBRW0vFg": {
+    "CreateProductLambdaVersioncRwKAkPB6FsPPEepbhoAxRNgXx2oYspOC1kXVotM": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "CreateProductLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "UpdateProductLambdaVersionsNxwmh1NaSL2x2Hz6Uag3gH4Ej3U1fXXyCdP9deY": {
+    "UpdateProductLambdaVersionupkSom4oVQ870cFLC133vN0E7wPCmgpNfhGUR8zVKc": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "UpdateProductLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "DeleteProductLambdaVersionbvwosjt7kVIuB8prlK9Xt4AvwAC1vQRiZY4iMa8JZbQ": {
+    "DeleteProductLambdaVersion9oHT2nedjV4SQZpHixOJjTjpGNxH9OfM9ALTVD5jAk": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "DeleteProductLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "AddToCartLambdaVersion9PcrWpxGkYaVSHDSbvESGtUACKQw2rbYk7Ytdg3kwU": {
+    "AddToCartLambdaVersionQTEClWbzGyct76lFGxRWqebWFkW0TWfK5dBawozSEE": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "AddToCartLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "GetCartLambdaVersionc9MjW3X2ikAOYoqiTRgeccpTG6UjcLly5azSim5I": {
+    "GetCartLambdaVersionODTvHR7L9mM27bxN7mEj3GtfNOVwIBB1YLVyXofjHg": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetCartLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "PollySpeakLambdaVersionfWaxOeADNJ32bGbbLGG4OHm1kr9rkO9D9lK7cWg5cI": {
+    "PollySpeakLambdaVersionA7bGWCpMwXEq73yS8WaTcdxGiApFiOgYZIO92QzfU": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "PollySpeakLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "RegisterUserLambdaVersionoqUWpL93o9vxg6g2fRNYt7I5a8Wkm0F4cU9F43yHOOw": {
+    "RegisterUserLambdaVersionokeNFAhAVM0Bq08i2iKG2tkmYCiPXOVVfbAGKjI8": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "RegisterUserLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "LoginUserLambdaVersionTJPsazAuX594yIPfuOhtmGJBvLYbkDrNkJWIzXyuMz0": {
+    "LoginUserLambdaVersionvwbHg5gYHNarz91687Knkt8bsy4ZaffOmXg1oSpPO44": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "LoginUserLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "ProcessPaymentLambdaVersionnDL28uQUnh4eDz0jWfzZkDJANYe3gTDMbyJjleSBs": {
+    "ProcessPaymentLambdaVersionPUtBgFYUC0kVuYN2xbsiczMrGDp8rzIYeeogZYxjlAE": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ProcessPaymentLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "GetPaymentLambdaVersionuIzcDgGu8VK6zTMlZncfDnmyokgWlVtwWHCCn50E4": {
+    "GetPaymentLambdaVersionAvuT6oQsw1mL5qHUtb37aayqK8RQ41LXgVGPccn5Q": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetPaymentLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
-    "LexChatLambdaVersionKfbjvVCmMLjEH2MbISi9CY1WVEbkUXVajTMuIfHOM": {
+    "LexChatLambdaVersionfwBYQlHGkgK0sqsDmTk3NM95m1sQOI2i3mQ59hZgeo": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "LexChatLambdaFunction"
         },
-        "CodeSha256": "qikRTq/9dwML41obcKFCuRJd5gjSeABnM1i+Pab2Byo="
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
+      }
+    },
+    "SendOTPLambdaVersion2RYsnZueCWZ3Iu8JpCArLla1xcMJ1Z98QsWGlJQ0": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SendOTPLambdaFunction"
+        },
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
+      }
+    },
+    "VerifyOTPLambdaVersionBrzAuIlaIrRsng4AHvbizjLhHGJhwUZQyyOxlUg43I": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "VerifyOTPLambdaFunction"
+        },
+        "CodeSha256": "C3QF48uc6aUr2lju8pzTUnDqiMjxvsfuCMZCW+hhHfM="
       }
     },
     "ApiGatewayRestApi": {
@@ -1019,6 +1175,45 @@
           "Ref": "ApiGatewayResourceLex"
         },
         "PathPart": "chat",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceOtp": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "otp",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceOtpSend": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "ApiGatewayResourceOtp"
+        },
+        "PathPart": "send",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceOtpVerify": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "ApiGatewayResourceOtp"
+        },
+        "PathPart": "verify",
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
         }
@@ -1468,6 +1663,96 @@
         },
         "ResourceId": {
           "Ref": "ApiGatewayResourceLexChat"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayMethodOtpSendOptions": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "ResponseModels": {}
+          }
+        ],
+        "RequestParameters": {},
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": {
+            "application/json": "{statusCode:200}"
+          },
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+              },
+              "ResponseTemplates": {
+                "application/json": ""
+              }
+            }
+          ]
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceOtpSend"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayMethodOtpVerifyOptions": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "ResponseModels": {}
+          }
+        ],
+        "RequestParameters": {},
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": {
+            "application/json": "{statusCode:200}"
+          },
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+              },
+              "ResponseTemplates": {
+                "application/json": ""
+              }
+            }
+          ]
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceOtpVerify"
         },
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
@@ -2072,7 +2357,99 @@
         "LexChatLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1762583696174": {
+    "ApiGatewayMethodOtpSendPost": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceOtpSend"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "SendOTPLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      },
+      "DependsOn": [
+        "SendOTPLambdaPermissionApiGateway"
+      ]
+    },
+    "ApiGatewayMethodOtpVerifyPost": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceOtpVerify"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "VerifyOTPLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      },
+      "DependsOn": [
+        "VerifyOTPLambdaPermissionApiGateway"
+      ]
+    },
+    "ApiGatewayDeployment1762811121789": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -2091,6 +2468,8 @@
         "ApiGatewayMethodPaymentsOptions",
         "ApiGatewayMethodPaymentsPaymentidVarOptions",
         "ApiGatewayMethodLexChatOptions",
+        "ApiGatewayMethodOtpSendOptions",
+        "ApiGatewayMethodOtpVerifyOptions",
         "ApiGatewayMethodProductsGet",
         "ApiGatewayMethodProductsIdVarGet",
         "ApiGatewayMethodProductsPost",
@@ -2103,7 +2482,9 @@
         "ApiGatewayMethodAuthLoginPost",
         "ApiGatewayMethodPaymentsPost",
         "ApiGatewayMethodPaymentsPaymentidVarGet",
-        "ApiGatewayMethodLexChatPost"
+        "ApiGatewayMethodLexChatPost",
+        "ApiGatewayMethodOtpSendPost",
+        "ApiGatewayMethodOtpVerifyPost"
       ]
     },
     "GetProductsLambdaPermissionApiGateway": {
@@ -2587,6 +2968,80 @@
         }
       }
     },
+    "SendOTPLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SendOTPLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "VerifyOTPLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "VerifyOTPLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
     "ProductsTable": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
@@ -2670,6 +3125,29 @@
         ],
         "BillingMode": "PAY_PER_REQUEST"
       }
+    },
+    "OTPTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": "exomart-backend-otp-prod",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "email",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "email",
+            "KeyType": "HASH"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "TimeToLiveSpecification": {
+          "Enabled": true,
+          "AttributeName": "expiresAt"
+        }
+      }
     }
   },
   "Outputs": {
@@ -2684,7 +3162,7 @@
     "GetProductsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetProductsLambdaVersionSoMloqla8AizqWZEMzZxxQRhLVWWvJ4JfubEELlOwI"
+        "Ref": "GetProductsLambdaVersionBIJmQY23lmtyOMdW2p82qUqZNCHOfx81iI9zqqUszwg"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-GetProductsLambdaFunctionQualifiedArn"
@@ -2693,7 +3171,7 @@
     "GetProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetProductLambdaVersioniYFvXYObl1BGhLbY9cvZmQgNbO80A0mOUfvUZY"
+        "Ref": "GetProductLambdaVersionchX3z93FaZ8PzlRxJlfwJ0XJoz7W3UfkhTZgRsGY4"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-GetProductLambdaFunctionQualifiedArn"
@@ -2702,7 +3180,7 @@
     "CreateProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CreateProductLambdaVersioncacsD6dNfUCjiOAx69qzLp0NcXjVsaWweBRW0vFg"
+        "Ref": "CreateProductLambdaVersioncRwKAkPB6FsPPEepbhoAxRNgXx2oYspOC1kXVotM"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-CreateProductLambdaFunctionQualifiedArn"
@@ -2711,7 +3189,7 @@
     "UpdateProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "UpdateProductLambdaVersionsNxwmh1NaSL2x2Hz6Uag3gH4Ej3U1fXXyCdP9deY"
+        "Ref": "UpdateProductLambdaVersionupkSom4oVQ870cFLC133vN0E7wPCmgpNfhGUR8zVKc"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-UpdateProductLambdaFunctionQualifiedArn"
@@ -2720,7 +3198,7 @@
     "DeleteProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "DeleteProductLambdaVersionbvwosjt7kVIuB8prlK9Xt4AvwAC1vQRiZY4iMa8JZbQ"
+        "Ref": "DeleteProductLambdaVersion9oHT2nedjV4SQZpHixOJjTjpGNxH9OfM9ALTVD5jAk"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-DeleteProductLambdaFunctionQualifiedArn"
@@ -2729,7 +3207,7 @@
     "AddToCartLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "AddToCartLambdaVersion9PcrWpxGkYaVSHDSbvESGtUACKQw2rbYk7Ytdg3kwU"
+        "Ref": "AddToCartLambdaVersionQTEClWbzGyct76lFGxRWqebWFkW0TWfK5dBawozSEE"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-AddToCartLambdaFunctionQualifiedArn"
@@ -2738,7 +3216,7 @@
     "GetCartLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetCartLambdaVersionc9MjW3X2ikAOYoqiTRgeccpTG6UjcLly5azSim5I"
+        "Ref": "GetCartLambdaVersionODTvHR7L9mM27bxN7mEj3GtfNOVwIBB1YLVyXofjHg"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-GetCartLambdaFunctionQualifiedArn"
@@ -2747,7 +3225,7 @@
     "PollySpeakLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "PollySpeakLambdaVersionfWaxOeADNJ32bGbbLGG4OHm1kr9rkO9D9lK7cWg5cI"
+        "Ref": "PollySpeakLambdaVersionA7bGWCpMwXEq73yS8WaTcdxGiApFiOgYZIO92QzfU"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-PollySpeakLambdaFunctionQualifiedArn"
@@ -2756,7 +3234,7 @@
     "RegisterUserLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "RegisterUserLambdaVersionoqUWpL93o9vxg6g2fRNYt7I5a8Wkm0F4cU9F43yHOOw"
+        "Ref": "RegisterUserLambdaVersionokeNFAhAVM0Bq08i2iKG2tkmYCiPXOVVfbAGKjI8"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-RegisterUserLambdaFunctionQualifiedArn"
@@ -2765,7 +3243,7 @@
     "LoginUserLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "LoginUserLambdaVersionTJPsazAuX594yIPfuOhtmGJBvLYbkDrNkJWIzXyuMz0"
+        "Ref": "LoginUserLambdaVersionvwbHg5gYHNarz91687Knkt8bsy4ZaffOmXg1oSpPO44"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-LoginUserLambdaFunctionQualifiedArn"
@@ -2774,7 +3252,7 @@
     "ProcessPaymentLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ProcessPaymentLambdaVersionnDL28uQUnh4eDz0jWfzZkDJANYe3gTDMbyJjleSBs"
+        "Ref": "ProcessPaymentLambdaVersionPUtBgFYUC0kVuYN2xbsiczMrGDp8rzIYeeogZYxjlAE"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-ProcessPaymentLambdaFunctionQualifiedArn"
@@ -2783,7 +3261,7 @@
     "GetPaymentLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetPaymentLambdaVersionuIzcDgGu8VK6zTMlZncfDnmyokgWlVtwWHCCn50E4"
+        "Ref": "GetPaymentLambdaVersionAvuT6oQsw1mL5qHUtb37aayqK8RQ41LXgVGPccn5Q"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-GetPaymentLambdaFunctionQualifiedArn"
@@ -2792,10 +3270,28 @@
     "LexChatLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "LexChatLambdaVersionKfbjvVCmMLjEH2MbISi9CY1WVEbkUXVajTMuIfHOM"
+        "Ref": "LexChatLambdaVersionfwBYQlHGkgK0sqsDmTk3NM95m1sQOI2i3mQ59hZgeo"
       },
       "Export": {
         "Name": "sls-exomart-backend-prod-LexChatLambdaFunctionQualifiedArn"
+      }
+    },
+    "SendOTPLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "SendOTPLambdaVersion2RYsnZueCWZ3Iu8JpCArLla1xcMJ1Z98QsWGlJQ0"
+      },
+      "Export": {
+        "Name": "sls-exomart-backend-prod-SendOTPLambdaFunctionQualifiedArn"
+      }
+    },
+    "VerifyOTPLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "VerifyOTPLambdaVersionBrzAuIlaIrRsng4AHvbizjLhHGJhwUZQyyOxlUg43I"
+      },
+      "Export": {
+        "Name": "sls-exomart-backend-prod-VerifyOTPLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {

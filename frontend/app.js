@@ -716,8 +716,8 @@ function quickViewProduct(productId) {
     modalContent.innerHTML = `
         <div class="product-gallery">
             <div class="product-gallery-image-wrapper">
-                <img src="${mainImage}" 
-                     class="main-image" id="main-image" alt="${safeName}">
+            <img src="${mainImage}" 
+                 class="main-image" id="main-image" alt="${safeName}">
                 ${discountValue > 0 ? `<div class="discount-badge modal-discount-badge">-${discountValue}%</div>` : ''}
             </div>
             <div class="thumbnail-images">
@@ -752,8 +752,8 @@ function quickViewProduct(productId) {
                         </button>
                     </div>
                     <button class="btn btn-primary btn-large" onclick="addToCartFromModal(event)">
-                        <i class="fas fa-cart-plus"></i> Add to Cart
-                    </button>
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
                 </div>
                 <button class="btn btn-outline btn-large" onclick="addToWishlistFromModal(event)">
                     <i class="fas fa-heart"></i> Add to Wishlist
@@ -2118,6 +2118,194 @@ function switchSection(id) {
 let lexChatSessionId = null;
 let lexChatOpen = false;
 let lexUnreadCount = 0;
+let lexCurrentLocale = 'hi_IN'; // Default to Hindi, but will auto-detect
+let voiceOutputEnabled = true;
+let voiceInputActive = false;
+let recognition = null;
+let currentAudio = null;
+let voiceInputNetworkErrors = 0; // Track network errors
+const MAX_NETWORK_ERRORS = 2; // Disable after 2 network errors
+
+// Detect if we're in a staging/demo environment where voice input might not work
+function isStagingEnvironment() {
+    const hostname = window.location.hostname;
+    return hostname.includes('staging') ||
+           hostname.includes('amplifyapp.com') ||
+           hostname.includes('localhost') ||
+           hostname.includes('127.0.0.1') ||
+           !window.location.protocol.startsWith('https');
+}
+
+// Check if voice input should be available
+function shouldEnableVoiceInput() {
+    // Voice input works best in production with HTTPS
+    return !isStagingEnvironment() && (window.location.protocol === 'https:' || window.location.hostname === 'localhost');
+}
+
+// Enhanced voice input for staging environments using Web Speech API
+function initializeMockVoiceRecognition() {
+    console.log('Initializing enhanced Web Speech API for staging environment');
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+
+        // Enhanced configuration for staging environments
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US'; // Most compatible language
+        recognition.maxAlternatives = 1;
+
+        // Add timeout handling
+        let recognitionTimeout;
+
+        recognition.onstart = () => {
+            console.log('Speech recognition started');
+            voiceInputActive = true;
+            updateVoiceInputButton();
+
+            // Set a timeout in case recognition hangs
+            recognitionTimeout = setTimeout(() => {
+                console.warn('Speech recognition timeout, stopping...');
+                recognition.stop();
+            }, 10000); // 10 second timeout
+        };
+
+        recognition.onresult = (event) => {
+            console.log('Speech recognition result received');
+            clearTimeout(recognitionTimeout);
+
+            const transcript = event.results[0][0].transcript;
+            console.log('Recognized speech:', transcript);
+
+            const input = document.getElementById('lex-chat-input');
+            if (input) {
+                input.value = transcript;
+            }
+            voiceInputActive = false;
+            updateVoiceInputButton();
+            // Reset network error counter on successful recognition
+            voiceInputNetworkErrors = 0;
+            // Auto-send the message
+            sendLexMessage();
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            clearTimeout(recognitionTimeout);
+            voiceInputActive = false;
+            updateVoiceInputButton();
+
+            // Handle different error types
+            if (event.error === 'no-speech') {
+                showToast('No speech detected. Please speak clearly and try again.', 'warning');
+            } else if (event.error === 'not-allowed') {
+                showToast('Microphone permission denied. Please enable microphone permissions in your browser settings.', 'error');
+            } else if (event.error === 'network') {
+                voiceInputNetworkErrors++;
+                console.warn(`Speech recognition network error (${voiceInputNetworkErrors}/${MAX_NETWORK_ERRORS})`);
+
+                if (voiceInputNetworkErrors >= MAX_NETWORK_ERRORS) {
+                    console.warn('Disabling voice input due to persistent network errors');
+                    recognition = null;
+                    const voiceBtn = document.getElementById('lex-voice-input-btn');
+                    if (voiceBtn) {
+                        voiceBtn.style.display = 'none';
+                    }
+                    showToast('Voice input disabled due to network issues. Please refresh the page.', 'error');
+                } else {
+                    showToast('Network error during speech recognition. Please check your connection and try again.', 'warning');
+                }
+            } else if (event.error === 'service-not-allowed') {
+                showToast('Speech recognition service not available. This may be due to browser restrictions in staging environments.', 'warning');
+            } else if (event.error === 'aborted') {
+                console.log('Speech recognition aborted by user');
+            } else if (event.error === 'audio-capture') {
+                showToast('No microphone found. Please check your microphone connection.', 'error');
+            } else if (event.error === 'bad-grammar') {
+                showToast('Speech recognition grammar error. Please try again.', 'error');
+            } else {
+                console.warn('Unknown speech recognition error:', event.error);
+                showToast('Speech recognition failed. Please try again.', 'error');
+            }
+        };
+
+        recognition.onend = () => {
+            console.log('Speech recognition ended');
+            clearTimeout(recognitionTimeout);
+            voiceInputActive = false;
+            updateVoiceInputButton();
+        };
+
+        // Test if speech recognition can start (for staging environments)
+        try {
+            // Try to start and immediately stop to test permissions
+            const testTimeout = setTimeout(() => {
+                console.log('Speech recognition test timeout');
+            }, 2000);
+
+            const originalOnstart = recognition.onstart;
+            const originalOnend = recognition.onend;
+            const originalOnerror = recognition.onerror;
+
+            recognition.onstart = () => {
+                clearTimeout(testTimeout);
+                console.log('Speech recognition test successful');
+                recognition.stop();
+            };
+
+            recognition.onend = () => {
+                clearTimeout(testTimeout);
+                recognition.onstart = originalOnstart;
+                recognition.onend = originalOnend;
+                recognition.onerror = originalOnerror;
+                showToast('Voice input ready! Click the microphone to speak.', 'success');
+            };
+
+            recognition.onerror = (event) => {
+                clearTimeout(testTimeout);
+                recognition.onstart = originalOnstart;
+                recognition.onend = originalOnend;
+                recognition.onerror = originalOnerror;
+
+                if (event.error === 'not-allowed') {
+                    showToast('Microphone permission denied. Please enable microphone permissions and refresh the page.', 'error');
+                } else {
+                    console.warn('Speech recognition test failed:', event.error);
+                    showToast('Voice input may not work in this environment. Try using a different browser or enable HTTPS.', 'warning');
+                }
+            };
+
+            recognition.start();
+        } catch (error) {
+            console.error('Speech recognition test failed:', error);
+            showToast('Voice input not supported in this browser environment.', 'warning');
+        }
+    } else {
+        console.warn('Web Speech API not supported in this browser');
+        showToast('Voice input not supported in this browser. Please use a modern browser like Chrome or Edge.', 'warning');
+        recognition = null;
+    }
+}
+
+// Detect language from text (Hindi or English)
+function detectLanguage(text) {
+    if (!text || text.trim().length === 0) {
+        return 'hi_IN'; // Default to Hindi
+    }
+
+    // Check for Devanagari script (Hindi) - Unicode range: \u0900-\u097F
+    const devanagariRegex = /[\u0900-\u097F]/;
+    const hasDevanagari = devanagariRegex.test(text);
+
+    // If text contains Devanagari characters, it's Hindi
+    if (hasDevanagari) {
+        return 'hi_IN';
+    }
+
+    // Otherwise, assume English
+    return 'en_US';
+}
 
 // Initialize Lex chat
 function initializeLexChat() {
@@ -2133,10 +2321,363 @@ function initializeLexChat() {
         localStorage.setItem('lexChatSessionId', lexChatSessionId);
     }
     
+    // Default to Hindi, but will auto-detect based on user input
+    lexCurrentLocale = 'hi_IN';
+    
+    // Load voice output preference
+    const savedVoiceOutput = localStorage.getItem('lexVoiceOutput');
+    if (savedVoiceOutput !== null) {
+        voiceOutputEnabled = savedVoiceOutput === 'true';
+        updateVoiceToggleButton();
+    }
+    
+    // Initialize Web Speech API for voice input
+    initializeVoiceRecognition();
+
+    // Set up periodic reset of network errors (every 5 minutes)
+    setInterval(() => {
+        if (voiceInputNetworkErrors > 0) {
+            voiceInputNetworkErrors = Math.max(0, voiceInputNetworkErrors - 1);
+            console.log(`Voice input network errors reduced to: ${voiceInputNetworkErrors}`);
+
+            // If errors are below threshold and recognition was disabled, re-enable it
+            if (voiceInputNetworkErrors < MAX_NETWORK_ERRORS && !recognition) {
+                console.log('Re-initializing voice recognition after error recovery');
+                initializeVoiceRecognition();
+                const voiceBtn = document.getElementById('lex-voice-input-btn');
+                if (voiceBtn) {
+                    voiceBtn.style.display = ''; // Show the button again
+                }
+                showToast('Voice input is now available again!', 'success');
+            }
+        }
+    }, 5 * 60 * 1000); // 5 minutes
+
     // Check if chat was open previously
     const wasOpen = localStorage.getItem('lexChatOpen') === 'true';
     if (wasOpen) {
         toggleLexChat();
+    }
+}
+
+// Initialize Web Speech API
+function initializeVoiceRecognition() {
+    // Don't re-initialize if already working and not disabled due to errors
+    if (recognition && voiceInputNetworkErrors < MAX_NETWORK_ERRORS) {
+        console.log('Voice recognition already initialized');
+        return;
+    }
+
+    // Check if we should use real voice input or mock for demo
+    if (shouldEnableVoiceInput()) {
+        // Try to use real Web Speech API
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            // Set default language to English (more reliable than Hindi)
+            recognition.lang = 'en-US';
+
+            console.log('Real voice recognition initialized successfully with language:', recognition.lang);
+
+            recognition.onstart = () => {
+                voiceInputActive = true;
+                updateVoiceInputButton();
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                const input = document.getElementById('lex-chat-input');
+                if (input) {
+                    input.value = transcript;
+                }
+                voiceInputActive = false;
+                updateVoiceInputButton();
+                // Reset network error counter on successful recognition
+                voiceInputNetworkErrors = 0;
+                // Auto-send the message
+                sendLexMessage();
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                voiceInputActive = false;
+                updateVoiceInputButton();
+
+                // Handle different error types
+                if (event.error === 'no-speech') {
+                    showToast('No speech detected. Please try again.', 'error');
+                } else if (event.error === 'not-allowed') {
+                    showToast('Microphone permission denied. Please enable it in your browser settings.', 'error');
+                } else if (event.error === 'network') {
+                    // Network error - speech recognition service unavailable
+                    voiceInputNetworkErrors++;
+                    console.warn('Speech recognition network error - service may be unavailable or language not supported');
+
+                    // If too many network errors, disable voice input
+                    if (voiceInputNetworkErrors >= MAX_NETWORK_ERRORS) {
+                        console.warn('Voice input disabled due to repeated network errors');
+                        recognition = null; // Disable recognition
+                        const voiceBtn = document.getElementById('lex-voice-input-btn');
+                        if (voiceBtn) {
+                            voiceBtn.style.display = 'none'; // Hide the button
+                        }
+                        showToast('Voice input is currently unavailable due to network issues. Please use typing instead.', 'warning');
+                    } else {
+                        // Show a warning but don't completely disable yet
+                        showToast(`Voice input network issue (${voiceInputNetworkErrors}/${MAX_NETWORK_ERRORS}). Please check your connection or try again later.`, 'warning');
+                    }
+                } else if (event.error === 'aborted') {
+                    // User or system aborted - don't show error
+                    console.log('Speech recognition aborted');
+                } else if (event.error === 'audio-capture') {
+                    showToast('No microphone found. Please check your microphone connection.', 'error');
+                } else if (event.error === 'bad-grammar') {
+                    showToast('Grammar error. Please try again.', 'error');
+                } else {
+                    // Generic error
+                    console.warn('Speech recognition error:', event.error);
+                    // Don't show toast for every error - too annoying
+                }
+            };
+
+            recognition.onend = () => {
+                voiceInputActive = false;
+                updateVoiceInputButton();
+            };
+        } else {
+            console.warn('Web Speech API not supported, falling back to mock');
+            initializeMockVoiceRecognition();
+        }
+    } else {
+        // Use mock voice recognition for staging/demo environments
+        console.log('Detected staging/demo environment, using mock voice recognition');
+        initializeMockVoiceRecognition();
+    }
+}
+
+// Language is fixed to Hindi - no language change function needed
+
+// Toggle voice output
+function toggleVoiceOutput() {
+    voiceOutputEnabled = !voiceOutputEnabled;
+    localStorage.setItem('lexVoiceOutput', voiceOutputEnabled.toString());
+    updateVoiceToggleButton();
+    showToast(voiceOutputEnabled ? 'Voice output enabled' : 'Voice output disabled', 'success');
+}
+
+// Update voice toggle button
+function updateVoiceToggleButton() {
+    const btn = document.getElementById('lex-voice-toggle');
+    if (btn) {
+        if (voiceOutputEnabled) {
+            btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            btn.classList.remove('disabled');
+        } else {
+            btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            btn.classList.add('disabled');
+        }
+    }
+}
+
+// Toggle voice input
+function toggleVoiceInput() {
+    if (!recognition) {
+        // Check if it was disabled due to network errors
+        if (voiceInputNetworkErrors >= MAX_NETWORK_ERRORS) {
+            showToast('Voice input is temporarily disabled due to network connectivity issues. Please refresh the page or try again later.', 'warning');
+        } else if (isStagingEnvironment()) {
+            showToast('Voice input is available in demo mode. Click the microphone button to test with text input.', 'info');
+            // Re-initialize mock if needed
+            initializeVoiceRecognition();
+        } else {
+            showToast('Voice input is not supported in your browser. Please update your browser or use typing instead.', 'error');
+        }
+        return;
+    }
+
+    if (voiceInputActive) {
+        recognition.stop();
+        voiceInputActive = false;
+        updateVoiceInputButton();
+    } else {
+        try {
+            // Always use English for recognition (most reliable)
+            // User can type in any language, detection will work
+            recognition.lang = 'en-US';
+            console.log('Starting voice input with English recognition');
+
+            recognition.start();
+        } catch (error) {
+            console.error('Error starting recognition:', error);
+            voiceInputNetworkErrors++;
+            if (voiceInputNetworkErrors >= MAX_NETWORK_ERRORS) {
+                recognition = null;
+                const voiceBtn = document.getElementById('lex-voice-input-btn');
+                if (voiceBtn) {
+                    voiceBtn.style.display = 'none';
+                }
+            }
+            showToast('Voice input unavailable. Please type your message instead.', 'error');
+        }
+    }
+}
+
+// Get speech recognition language code from locale
+function getSpeechRecognitionLang(locale) {
+    const langMap = {
+        'en_US': 'en-US',
+        'en_GB': 'en-GB',
+        'hi_IN': 'hi-IN',
+    };
+    return langMap[locale] || 'en-US'; // Default to English
+}
+
+// Update voice input button
+function updateVoiceInputButton() {
+    const btn = document.getElementById('lex-voice-input-btn');
+    if (btn) {
+        if (voiceInputActive) {
+            btn.classList.add('active');
+            btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+    }
+}
+
+// Play text-to-speech using Polly
+async function playLexTextToSpeech(text, locale) {
+    if (!voiceOutputEnabled || !text) return;
+    
+    try {
+        // Stop any currently playing audio
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
+        const response = await fetch(`${API_ENDPOINT}/polly/speak`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: text,
+                locale: locale || lexCurrentLocale,
+            }),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to synthesize speech');
+        }
+        
+        // Get audio data - API Gateway returns base64 encoded even with isBase64Encoded: true
+        // We need to decode it manually
+        let audioBlob;
+        
+        try {
+            // Get response as text (it's base64 encoded)
+            const base64Text = await response.text();
+            
+            if (!base64Text || base64Text.length === 0) {
+                console.error('Empty audio response');
+                return;
+            }
+            
+            // Check if it's a JSON error
+            if (base64Text.startsWith('{') || base64Text.startsWith('[')) {
+                try {
+                    const jsonData = JSON.parse(base64Text);
+                    if (jsonData.error) {
+                        console.error('Polly API error:', jsonData.error);
+                        return;
+                    }
+                } catch (e) {
+                    // Not JSON, continue
+                }
+            }
+            
+            // Decode base64 to binary
+            const binaryString = atob(base64Text);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            // Verify it's MP3 (check for MP3 sync word)
+            const isMP3 = bytes[0] === 0xFF && (bytes[1] & 0xE0) === 0xE0;
+            if (!isMP3) {
+                console.warn('Response does not appear to be valid MP3 format');
+                // Still try to play it - might work
+            }
+            
+            audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
+        } catch (error) {
+            console.error('Failed to process audio:', error);
+            // Fail silently for audio - don't interrupt user experience
+            return;
+        }
+        
+        if (!audioBlob || audioBlob.size === 0) {
+            console.warn('Empty audio blob, skipping playback');
+            return;
+        }
+        
+        // Verify blob type
+        if (audioBlob.type && !audioBlob.type.includes('audio')) {
+            console.warn('Unexpected blob type:', audioBlob.type);
+            // Try to force audio/mpeg type
+            audioBlob = new Blob([audioBlob], { type: 'audio/mpeg' });
+        }
+        
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Create audio element with error handling
+        currentAudio = new Audio();
+        
+        // Set up event handlers BEFORE setting src
+        currentAudio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            currentAudio = null;
+        };
+        
+        currentAudio.onerror = (error) => {
+            console.error('Audio playback error:', error);
+            console.error('Audio error details:', {
+                error: currentAudio.error,
+                networkState: currentAudio.networkState,
+                readyState: currentAudio.readyState,
+                src: currentAudio.src
+            });
+            URL.revokeObjectURL(audioUrl);
+            currentAudio = null;
+        };
+        
+        currentAudio.oncanplaythrough = () => {
+            // Audio is ready, try to play
+            currentAudio.play().catch(err => {
+                console.error('Audio play error:', err);
+                // Fail silently
+            });
+        };
+        
+        // Set source and load
+        currentAudio.src = audioUrl;
+        currentAudio.load();
+        
+        // Fallback: try to play after a short delay
+        setTimeout(() => {
+            if (currentAudio && currentAudio.readyState >= 2) {
+                currentAudio.play().catch(err => {
+                    console.error('Audio play fallback error:', err);
+                });
+            }
+        }, 100);
+    } catch (error) {
+        console.error('Text-to-speech error:', error);
+        // Fail silently - don't interrupt user experience
     }
 }
 
@@ -2193,6 +2734,10 @@ async function sendLexMessage() {
     const message = input.value.trim();
     if (!message) return;
     
+    // Auto-detect language from user's message
+    const detectedLocale = detectLanguage(message);
+    lexCurrentLocale = detectedLocale;
+    
     // Disable input and button
     input.disabled = true;
     if (sendBtn) {
@@ -2218,6 +2763,7 @@ async function sendLexMessage() {
                 message: message,
                 sessionId: lexChatSessionId,
                 userId: userId,
+                locale: lexCurrentLocale, // Use detected locale
             }),
         });
         
@@ -2252,9 +2798,11 @@ async function sendLexMessage() {
         // Only show Lex message if we didn't handle it or if it's just informational
         if (shouldShowLexMessage && data.message && !data.message.includes("couldn't process") && !data.message.includes("apologize")) {
             addLexMessage(data.message, 'bot', data.intent, data.slots);
+            // Voice output is handled automatically in addLexMessage
         } else if (shouldShowLexMessage && (data.isElicitingSlot || data.isConfirmingIntent)) {
             // Show message if Lex is asking for more info
             addLexMessage(data.message, 'bot', data.intent, data.slots);
+            // Voice output is handled automatically in addLexMessage
         }
         
     } catch (error) {
@@ -2313,6 +2861,11 @@ function addLexMessage(text, type = 'bot', intent = null, slots = null, isError 
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     
+    // Play voice output for bot messages (if enabled and not an error)
+    if (type === 'bot' && !isError && voiceOutputEnabled) {
+        playLexTextToSpeech(text, lexCurrentLocale);
+    }
+    
     // If chat is closed, increment unread count
     if (!lexChatOpen && type === 'bot') {
         lexUnreadCount++;
@@ -2360,25 +2913,42 @@ function handleLexIntent(intent, slots, message) {
     // Handle different intents
     if (intent === 'SearchProducts' || intent === 'FindProduct') {
         // Extract product name or category from slots
-        const productName = slots?.ProductName?.value?.originalValue || slots?.productName?.value?.originalValue;
+        const productName = slots?.ProductName?.value?.originalValue || slots?.productName?.value?.originalValue || slots?.ProductName?.value?.resolvedValue || slots?.productName?.value?.resolvedValue;
         const category = slots?.Category?.value?.originalValue || slots?.category?.value?.originalValue;
         
-        if (productName) {
+        // Only perform search if we have a product name in slots
+        // If no product name, Lex will ask for it (don't handle it yet)
+        // Also check if productName is the same as common search phrases (utterances)
+        const searchPhrases = ['उत्पाद खोजें', 'उत्पाद', 'खोजें', 'search', 'find'];
+        const isValidProductName = productName && 
+                                   productName.trim() && 
+                                   !searchPhrases.includes(productName.trim()) &&
+                                   productName.trim().length > 2;
+        
+        if (isValidProductName) {
             // Search for product
             const input = document.getElementById('search-input');
             if (input) {
                 input.value = productName;
                 performSearch();
                 showProducts();
-                addLexMessage(`I've searched for "${productName}" for you. Check the products section!`, 'bot');
+                // Use appropriate language for response
+                const searchMsg = lexCurrentLocale === 'hi_IN' 
+                    ? `मैंने "${productName}" के लिए खोज की है। उत्पाद अनुभाग देखें!`
+                    : `I've searched for "${productName}" for you. Check the products section!`;
+                addLexMessage(searchMsg, 'bot');
                 handled = true;
             }
         } else if (category) {
             filterByCategory(category);
             showProducts();
-            addLexMessage(`I've filtered products by "${category}" for you.`, 'bot');
+            const categoryMsg = lexCurrentLocale === 'hi_IN'
+                ? `मैंने "${category}" के अनुसार उत्पाद फ़िल्टर किए हैं।`
+                : `I've filtered products by "${category}" for you.`;
+            addLexMessage(categoryMsg, 'bot');
             handled = true;
         }
+        // If no product name, let Lex handle the prompt (don't mark as handled)
     } else if (intent === 'AddToCart' || intent === 'AddItem') {
         const productName = slots?.ProductName?.value?.originalValue || slots?.productName?.value?.originalValue;
         if (productName) {
@@ -2388,25 +2958,40 @@ function handleLexIntent(intent, slots, message) {
             );
             if (product) {
                 addToCart(product.id);
-                addLexMessage(`I've added "${product.name}" to your cart!`, 'bot');
+                const cartMsg = lexCurrentLocale === 'hi_IN'
+                    ? `मैंने "${product.name}" को आपकी कार्ट में जोड़ दिया है!`
+                    : `I've added "${product.name}" to your cart!`;
+                addLexMessage(cartMsg, 'bot');
                 handled = true;
             } else {
                 // Product not found
-                addLexMessage(`I couldn't find a product matching "${productName}". Please check the product name and try again.`, 'bot');
+                const notFoundMsg = lexCurrentLocale === 'hi_IN'
+                    ? `मुझे "${productName}" से मेल खाने वाला कोई उत्पाद नहीं मिला। कृपया उत्पाद का नाम जांचें और पुनः प्रयास करें।`
+                    : `I couldn't find a product matching "${productName}". Please check the product name and try again.`;
+                addLexMessage(notFoundMsg, 'bot');
                 handled = true;
             }
         }
     } else if (intent === 'ViewCart' || intent === 'CheckCart') {
         showCart();
-        addLexMessage('I\'ve opened your cart for you!', 'bot');
+        const cartOpenMsg = lexCurrentLocale === 'hi_IN'
+            ? 'मैंने आपकी कार्ट खोल दी है!'
+            : 'I\'ve opened your cart for you!';
+        addLexMessage(cartOpenMsg, 'bot');
         handled = true;
     } else if (intent === 'ViewWishlist') {
         showWishlist();
-        addLexMessage('I\'ve opened your wishlist for you!', 'bot');
+        const wishlistMsg = lexCurrentLocale === 'hi_IN'
+            ? 'मैंने आपकी विशलिस्ट खोल दी है!'
+            : 'I\'ve opened your wishlist for you!';
+        addLexMessage(wishlistMsg, 'bot');
         handled = true;
     } else if (intent === 'ViewDeals' || intent === 'ShowDeals') {
         showDeals();
-        addLexMessage('I\'ve shown you the hot deals!', 'bot');
+        const dealsMsg = lexCurrentLocale === 'hi_IN'
+            ? 'मैंने आपको हॉट डील्स दिखा दी हैं!'
+            : 'I\'ve shown you the hot deals!';
+        addLexMessage(dealsMsg, 'bot');
         handled = true;
     } else if (intent === 'RemoveFromCart' || intent === 'RemoveItem') {
         const productName = slots?.ProductName?.value?.originalValue || slots?.productName?.value?.originalValue;
@@ -2419,14 +3004,23 @@ function handleLexIntent(intent, slots, message) {
                 const cartItem = cart.find(item => item.productId === product.id);
                 if (cartItem) {
                     removeFromCart(product.id);
-                    addLexMessage(`I've removed "${product.name}" from your cart.`, 'bot');
+                    const removeMsg = lexCurrentLocale === 'hi_IN'
+                        ? `मैंने "${product.name}" को आपकी कार्ट से हटा दिया है।`
+                        : `I've removed "${product.name}" from your cart.`;
+                    addLexMessage(removeMsg, 'bot');
                     handled = true;
                 } else {
-                    addLexMessage(`"${product.name}" is not in your cart.`, 'bot');
+                    const notInCartMsg = lexCurrentLocale === 'hi_IN'
+                        ? `"${product.name}" आपकी कार्ट में नहीं है।`
+                        : `"${product.name}" is not in your cart.`;
+                    addLexMessage(notInCartMsg, 'bot');
                     handled = true;
                 }
             } else {
-                addLexMessage(`I couldn't find a product matching "${productName}".`, 'bot');
+                const notFoundMsg = lexCurrentLocale === 'hi_IN'
+                    ? `मुझे "${productName}" से मेल खाने वाला कोई उत्पाद नहीं मिला।`
+                    : `I couldn't find a product matching "${productName}".`;
+                addLexMessage(notFoundMsg, 'bot');
                 handled = true;
             }
         }
@@ -2439,28 +3033,46 @@ function handleLexIntent(intent, slots, message) {
             );
             if (product) {
                 addToWishlist(product.id);
-                addLexMessage(`I've added "${product.name}" to your wishlist!`, 'bot');
+                const wishlistAddMsg = lexCurrentLocale === 'hi_IN'
+                    ? `मैंने "${product.name}" को आपकी विशलिस्ट में जोड़ दिया है!`
+                    : `I've added "${product.name}" to your wishlist!`;
+                addLexMessage(wishlistAddMsg, 'bot');
                 handled = true;
             } else {
-                addLexMessage(`I couldn't find a product matching "${productName}". Please check the product name and try again.`, 'bot');
+                const notFoundMsg = lexCurrentLocale === 'hi_IN'
+                    ? `मुझे "${productName}" से मेल खाने वाला कोई उत्पाद नहीं मिला। कृपया उत्पाद का नाम जांचें और पुनः प्रयास करें।`
+                    : `I couldn't find a product matching "${productName}". Please check the product name and try again.`;
+                addLexMessage(notFoundMsg, 'bot');
                 handled = true;
             }
         }
     } else if (intent === 'ThankYou' || intent === 'Thanks' || intent === 'NoThanks') {
-        addLexMessage('You\'re welcome! Is there anything else I can help you with?', 'bot');
+        const thankYouMsg = lexCurrentLocale === 'hi_IN'
+            ? 'आपका स्वागत है! क्या मैं आपकी और किसी चीज़ में मदद कर सकता हूं?'
+            : 'You\'re welcome! Is there anything else I can help you with?';
+        addLexMessage(thankYouMsg, 'bot');
         handled = true;
     } else if (intent === 'Yes' || intent === 'YesHelp') {
-        addLexMessage('Great! What would you like me to help you with? You can search for products, add items to cart, view deals, and more!', 'bot');
+        const yesMsg = lexCurrentLocale === 'hi_IN'
+            ? 'बढ़िया! मैं आपकी किस चीज़ में मदद कर सकता हूं? आप उत्पाद खोज सकते हैं, कार्ट में आइटम जोड़ सकते हैं, डील देख सकते हैं, और बहुत कुछ!'
+            : 'Great! What would you like me to help you with? You can search for products, add items to cart, view deals, and more!';
+        addLexMessage(yesMsg, 'bot');
         handled = true;
     } else if (intent === 'No' || intent === 'NoHelp') {
-        addLexMessage('Thank you for using ExoMart! Have a great day!', 'bot');
+        const noMsg = lexCurrentLocale === 'hi_IN'
+            ? 'ExoMart का उपयोग करने के लिए धन्यवाद! आपका दिन शानदार रहे!'
+            : 'Thank you for using ExoMart! Have a great day!';
+        addLexMessage(noMsg, 'bot');
         handled = true;
     }
     
     // Add follow-up question after successful actions
     if (handled && (intent === 'AddToCart' || intent === 'RemoveFromCart' || intent === 'AddToWishlist')) {
         setTimeout(() => {
-            addLexMessage('Is there anything else I can help you with?', 'bot');
+            const followUpMsg = lexCurrentLocale === 'hi_IN'
+                ? 'क्या मैं आपकी और किसी चीज़ में मदद कर सकता हूं?'
+                : 'Is there anything else I can help you with?';
+            addLexMessage(followUpMsg, 'bot');
         }, 1500);
     }
     
@@ -2540,3 +3152,4 @@ function updateLexChatBadge() {
 }
 
 // Lex chat initialization is handled in the main DOMContentLoaded event above
+
